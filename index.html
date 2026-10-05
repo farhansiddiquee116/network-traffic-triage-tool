@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Advanced Educational Network Traffic Triage Tool for SOC analysts. Analyze Wireshark CSV packet exports locally with explainable detection rules, MITRE ATT&CK mapping, and global network traffic map.">
+  <title>Network Traffic Triage Tool - Advanced SOC Analyst Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Main Application Header -->
+    <header class="app-header">
+      <div class="header-top">
+        <div>
+          <div class="brand-badge">Enterprise SOC Lab &bull; Educational Edition</div>
+          <h1 class="app-title">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent-cyan);">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            Network Traffic Triage Tool
+          </h1>
+          <p class="app-subtitle">Identify unusual patterns, explore explainable detections, MITRE ATT&amp;CK mappings, and learn SOC triage workflows</p>
+        </div>
+
+        <!-- Privacy Assurance Badge -->
+        <div class="privacy-pill" title="All processing is client-side in your browser">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Your packet capture data is analysed locally in your browser and is not uploaded anywhere.</span>
+        </div>
+      </div>
+
+      <!-- Legal & Educational Disclaimer Banner -->
+      <div class="disclaimer-banner" role="region" aria-label="Educational Disclaimer">
+        <p><strong>Educational Disclaimer:</strong> This tool highlights activity worth investigating; alerts do not prove malicious behaviour.</p>
+        <p>Only analyse network traffic from systems and networks you own or are explicitly authorised to monitor.</p>
+      </div>
+    </header>
+
+    <main>
+      <!-- Ingestion & Test Mode Grid -->
+      <section class="ingest-grid" aria-labelledby="ingest-title">
+        <!-- Upload Card -->
+        <div class="card">
+          <h2 id="ingest-title" class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload Wireshark CSV
+          </h2>
+          <p class="card-desc">Drag and drop your exported Wireshark packet list CSV, or browse to select a file.</p>
+          
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Dropzone for Wireshark CSV file">
+            <input type="file" id="file-input" class="file-input" accept=".csv,text/csv" aria-label="Select Wireshark CSV file">
+            <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="16 16 12 12 8 16"></polyline>
+              <line x1="12" y1="12" x2="12" y2="21"></line>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+              <polyline points="16 16 12 12 8 16"></polyline>
+            </svg>
+            <div class="dropzone-text">Drop your Wireshark CSV here or click to browse</div>
+            <div class="dropzone-subtext">Supports standard columns: No., Time, Source, Destination, Protocol, Length, Info</div>
+          </div>
+        </div>
+
+        <!-- Instant Test Mode Card with Advanced APT Lab -->
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Test Mode &amp; Demonstrations
+          </h2>
+          <p class="card-desc">Instantly load safe sample datasets to demonstrate triage and rule triggers:</p>
+          
+          <div class="demo-buttons-group">
+            <button type="button" class="btn btn-secondary" id="btn-demo-normal">
+              <div>
+                <strong>Load Normal Sample</strong>
+                <span class="btn-demo-desc">Baseline benign traffic (web, DNS, NTP) &bull; 0 alerts</span>
+              </div>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-demo-high">
+              <div>
+                <strong>Load High-Volume Sample</strong>
+                <span class="btn-demo-desc">Single source >50 packets &bull; Triggers High Volume Alert</span>
+              </div>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-demo-mixed">
+              <div>
+                <strong>Load Mixed SOC Lab</strong>
+                <span class="btn-demo-desc">Scanning, high ICMP, repeated flows, port discovery</span>
+              </div>
+            </button>
+            <button type="button" class="btn btn-accent" id="btn-demo-apt">
+              <div>
+                <strong>Load Advanced APT Scenario</strong>
+                <span class="btn-demo-desc">Recon &rarr; C2 Web Beacon &rarr; DNS Tunnel &rarr; Exfiltration Burst</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- File Status Banner -->
+      <section id="file-status-banner" class="file-status-banner hidden" aria-live="polite">
+        <div class="file-status-left">
+          <span id="status-badge" class="status-badge demo">Demo Data</span>
+          <div class="file-details">
+            <div id="file-name" class="file-name">sample.csv</div>
+            <div id="file-meta" class="file-meta">0 packets loaded</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Missing Field Warning -->
+      <div id="missing-warning" class="disclaimer-banner hidden" style="border-left-color: var(--sev-med-border); margin-bottom: 2rem;" role="alert"></div>
+
+      <!-- Configurable Settings Section -->
+      <section class="settings-section" id="settings-section" aria-labelledby="settings-heading">
+        <div class="settings-header" id="settings-header" role="button" tabindex="0" aria-expanded="false">
+          <h2 id="settings-heading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Configurable Detection Thresholds
+          </h2>
+          <svg class="settings-toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+
+        <div class="settings-content">
+          <div class="thresholds-grid">
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-packets-per-source">Packets per Source</label>
+              <span class="threshold-desc">Rule 1: Flags high-volume source host</span>
+              <input type="number" id="th-packets-per-source" class="threshold-input" min="5" max="10000" value="50">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-unique-dests">Unique Destinations</label>
+              <span class="threshold-desc">Rule 2: Flags potential host/subnet discovery</span>
+              <input type="number" id="th-unique-dests" class="threshold-input" min="2" max="1000" value="10">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-unique-ports">Unique Destination Ports</label>
+              <span class="threshold-desc">Rule 3: Flags potential port scan on a target</span>
+              <input type="number" id="th-unique-ports" class="threshold-input" min="2" max="1000" value="10">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-icmp-packets">ICMP Packets per Source</label>
+              <span class="threshold-desc">Rule 4: Flags heavy ping/sweep diagnostics</span>
+              <input type="number" id="th-icmp-packets" class="threshold-input" min="5" max="1000" value="30">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-dns-packets">DNS Packets per Source</label>
+              <span class="threshold-desc">Rule 5: Flags unusually high DNS queries</span>
+              <input type="number" id="th-dns-packets" class="threshold-input" min="5" max="1000" value="30">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-repeated-packets">Source-to-Dest Pair Volume</label>
+              <span class="threshold-desc">Rule 6: Flags sustained 2-host traffic flows</span>
+              <input type="number" id="th-repeated-packets" class="threshold-input" min="5" max="5000" value="40">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-dns-subdomain-len">DNS Subdomain Max Chars</label>
+              <span class="threshold-desc">Rule 9: Potential DNS Tunneling string length</span>
+              <input type="number" id="th-dns-subdomain-len" class="threshold-input" min="15" max="150" value="25">
+            </div>
+
+            <div class="threshold-field">
+              <label class="threshold-label" for="th-exfil-bytes">Exfiltration Byte Outbound Threshold</label>
+              <span class="threshold-desc">Rule 11: Flags high-volume outbound data transfer</span>
+              <input type="number" id="th-exfil-bytes" class="threshold-input" min="1000" max="10000000" value="12000">
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <div class="settings-educational-note">
+              <strong>Analyst Note:</strong> Thresholds should be adjusted based on the environment. A busy enterprise server may legitimately generate thousands of packets, while the same activity from a single desktop endpoint might deserve immediate investigation.
+            </div>
+            <button type="button" class="btn btn-secondary" id="btn-reset-thresholds">Reset Defaults</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Dashboard (Revealed upon data parse) -->
+      <div id="dashboard-section" class="hidden">
+        <!-- Overview Summary Metric Cards -->
+        <section class="metrics-grid" aria-label="Network Overview Summary">
+          <div class="metric-card">
+            <span class="metric-label">Total Packets</span>
+            <div class="metric-value" id="metric-total-packets">0</div>
+            <span class="metric-sub">Analyzed in capture</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Unique Sources</span>
+            <div class="metric-value" id="metric-unique-sources">0</div>
+            <span class="metric-sub">Distinct origin hosts</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Unique Destinations</span>
+            <div class="metric-value" id="metric-unique-dests">0</div>
+            <span class="metric-sub">Distinct targets contacted</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Most Active Source</span>
+            <div class="metric-value" id="metric-active-source" style="font-size: 1.15rem; font-family: monospace;">-</div>
+            <span class="metric-sub">Top packet generator</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Top Destination</span>
+            <div class="metric-value" id="metric-active-dest" style="font-size: 1.15rem; font-family: monospace;">-</div>
+            <span class="metric-sub">Most contacted endpoint</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Common Protocol</span>
+            <div class="metric-value" id="metric-top-proto">-</div>
+            <span class="metric-sub">Dominant traffic type</span>
+          </div>
+
+          <div class="metric-card">
+            <span class="metric-label">Avg Packet Length</span>
+            <div class="metric-value" id="metric-avg-len">-</div>
+            <span class="metric-sub">Bytes per frame</span>
+          </div>
+        </section>
+
+        <!-- Transparent Investigation Score Banner -->
+        <section class="score-card" aria-label="Investigation Score">
+          <div class="score-main">
+            <div class="score-number-box">
+              <span class="score-number" id="score-number">0</span>
+              <span class="score-unit">Points</span>
+            </div>
+            <div>
+              <div class="score-text-title" id="score-title">Normal Baseline Activity</div>
+              <p class="score-text-desc" id="score-desc">Traffic conforms to expected baseline behavior without threshold deviations.</p>
+            </div>
+          </div>
+          <div class="score-breakdown-pills" id="score-pills"></div>
+        </section>
+
+        <!-- REPLACED: GUI GRAPHIC NETWORK TRAFFIC ON MAP -->
+        <section class="geomap-section" id="geomap-section" aria-label="Global Network Traffic & Threat Map">
+          <div class="map-header">
+            <div>
+              <h3 class="card-title" style="margin-bottom: 0.2rem;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent-cyan);">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                Global Network Traffic &amp; Threat Map
+              </h3>
+              <p class="card-desc" style="margin-bottom: 0;">Interactive GUI Map &bull; Geographic origin-to-destination pulse arcs &bull; Click any point to filter</p>
+            </div>
+            <div class="map-controls">
+              <div class="map-legend">
+                <div class="legend-item"><span class="legend-dot origin"></span> Local Origin / Subnet</div>
+                <div class="legend-item"><span class="legend-dot benign"></span> Standard Flow</div>
+                <div class="legend-item"><span class="legend-dot threat"></span> Threat / Anomaly Arc</div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="btn-reset-geomap" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Reset Map View</button>
+            </div>
+          </div>
+
+          <div class="map-container">
+            <div class="map-hud-overlay">
+              <span class="hud-stat-pill" id="map-flows-count">0 Geographic Flows</span>
+              <span class="hud-stat-pill" id="map-threats-count">0 Flagged Threats</span>
+            </div>
+            <canvas id="traffic-map-canvas"></canvas>
+            <div class="map-tooltip" id="map-tooltip"></div>
+          </div>
+
+          <div class="map-ticker-bar">
+            <span class="ticker-label">Active Threat Stream:</span>
+            <span class="ticker-content" id="map-ticker-text">Awaiting network traffic analysis...</span>
+          </div>
+        </section>
+
+        <!-- Visual Distribution Grid -->
+        <section class="charts-grid">
+          <!-- Top Sources -->
+          <div class="breakdown-card">
+            <h3>
+              <span>Top Source Hosts</span>
+              <span class="breakdown-count">Ranked by volume</span>
+            </h3>
+            <div class="bar-list" id="sources-bar-list"></div>
+          </div>
+
+          <!-- Top Destinations -->
+          <div class="breakdown-card">
+            <h3>
+              <span>Top Destinations</span>
+              <span class="breakdown-count">Ranked by volume</span>
+            </h3>
+            <div class="bar-list" id="dests-bar-list"></div>
+          </div>
+
+          <!-- Protocol Distribution (Span full width) -->
+          <div class="breakdown-card" style="grid-column: 1 / -1;">
+            <h3>
+              <span>Protocol Distribution</span>
+              <span class="breakdown-count">Protocols observed in this capture</span>
+            </h3>
+            <div class="bar-list" id="protocol-bar-list"></div>
+          </div>
+        </section>
+
+        <!-- Interactive Filters Toolbar with MITRE & Report Export -->
+        <section class="toolbar-section" aria-label="Filter Alerts and Packets">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="filter-search" class="search-input" placeholder="Search alerts, IPs, reasons, MITRE tags..." aria-label="Search alerts and IP addresses">
+          </div>
+
+          <select id="filter-source" class="filter-select" aria-label="Filter by Source IP">
+            <option value="">All Sources</option>
+          </select>
+
+          <select id="filter-dest" class="filter-select" aria-label="Filter by Destination IP">
+            <option value="">All Destinations</option>
+          </select>
+
+          <select id="filter-protocol" class="filter-select" aria-label="Filter by Protocol">
+            <option value="">All Protocols</option>
+          </select>
+
+          <select id="filter-severity" class="filter-select" aria-label="Filter by Severity">
+            <option value="">All Severities</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+            <option value="Informational">Informational</option>
+          </select>
+
+          <select id="filter-mitre" class="filter-select" aria-label="Filter by MITRE Tactic">
+            <option value="">All MITRE Tactics</option>
+            <option value="Reconnaissance">Reconnaissance (T1046)</option>
+            <option value="Command and Control">Command &amp; Control (T1071)</option>
+            <option value="Exfiltration">Exfiltration (T1048)</option>
+            <option value="Defense Evasion">Defense Evasion (T1571)</option>
+          </select>
+
+          <button type="button" class="btn-clear-filters" id="btn-clear-filters">Clear Filters</button>
+          
+          <button type="button" class="btn-export-report" id="btn-export-report">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Export SOC Report
+          </button>
+        </section>
+
+        <!-- Triage Alerts Feed with MITRE Badges -->
+        <section class="alerts-section" aria-labelledby="alerts-heading">
+          <div class="section-header">
+            <h2 id="alerts-heading" class="section-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent-cyan);">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Triage Investigation Alerts
+            </h2>
+            <span class="alerts-count-badge" id="alerts-count-badge">0 alerts</span>
+          </div>
+
+          <div id="alerts-container" class="alerts-list"></div>
+        </section>
+
+        <!-- Raw Packet Table Inspector -->
+        <section class="inspector-section" id="inspector-section" aria-label="Raw Packet Inspector">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent-cyan);">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                Raw Packet Frame Inspector
+              </h2>
+              <p class="card-desc" style="margin-bottom: 0;">Interactive Wireshark Dissection Grid &bull; Click any row to inspect fields</p>
+            </div>
+            <span class="alerts-count-badge" id="packet-count-badge">0 frames</span>
+          </div>
+
+          <div class="inspector-table-wrapper">
+            <table class="packet-table" id="packet-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">No.</th>
+                  <th style="width: 90px;">Time (s)</th>
+                  <th style="width: 140px;">Source</th>
+                  <th style="width: 140px;">Destination</th>
+                  <th style="width: 90px;">Protocol</th>
+                  <th style="width: 80px;">Len (B)</th>
+                  <th>Info Dissection</th>
+                </tr>
+              </thead>
+              <tbody id="packet-table-body"></tbody>
+            </table>
+          </div>
+
+          <div class="packet-pagination">
+            <div id="pagination-info">Showing packets 1 to 25 of 100</div>
+            <div class="pagination-btn-group">
+              <button type="button" class="btn-page" id="btn-prev-page" disabled>&larr; Previous</button>
+              <button type="button" class="btn-page" id="btn-next-page">Next &rarr;</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Educational Core Guide Section -->
+      <section class="educational-section" aria-labelledby="edu-heading">
+        <h2 id="edu-heading" class="section-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          How to Think Like a SOC Analyst
+        </h2>
+        
+        <div class="edu-grid">
+          <!-- Analyst Workflow Steps -->
+          <div class="edu-card">
+            <h3>Standard Network Triage Workflow</h3>
+            <ol class="workflow-steps">
+              <li>
+                <strong>Observe unusual behaviour</strong>
+                Identify hosts deviating from normal packet volume, unusual protocol spikes, periodic beaconing, or atypical destination counts.
+              </li>
+              <li>
+                <strong>Identify the source and destination</strong>
+                Determine who is initiating communication and where the requests are landing (internal subnet vs. public Internet).
+              </li>
+              <li>
+                <strong>Determine which protocol is involved</strong>
+                Is it web traffic (HTTP/HTTPS), resolution (DNS), control messages (ICMP), or raw transport (TCP/UDP)?
+              </li>
+              <li>
+                <strong>Establish whether the activity is expected</strong>
+                Check system roles. A corporate file server is expected to push gigabytes; an office receptionist PC is not.
+              </li>
+              <li>
+                <strong>Look for supporting indicators</strong>
+                Are there regular periodic heartbeats (C2 Beaconing)? Are there high-entropy DNS subdomains (DNS Tunneling)?
+              </li>
+              <li>
+                <strong>Correlate with other security telemetry &amp; MITRE ATT&amp;CK</strong>
+                Cross-reference firewall logs, EDR process executions, or authentication audits from the suspected host.
+              </li>
+              <li>
+                <strong>Decide whether further investigation is required</strong>
+                Document your findings. Export a professional SOC Incident Triage Report for escalation or case closure.
+              </li>
+            </ol>
+
+            <div class="quote-box">
+              &ldquo;An anomaly is a starting point for investigation, not proof of compromise.&rdquo;
+            </div>
+          </div>
+
+          <!-- Wireshark Instructions & Key Limitations -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="edu-card">
+              <h3>Exporting Packets in Wireshark</h3>
+              <p class="card-desc" style="margin-bottom: 0.75rem;">Follow these 5 steps to generate compatible CSV files:</p>
+              <ol style="padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;">
+                <li>Open <strong>Wireshark</strong> and select your active network adapter.</li>
+                <li>Capture traffic in an authorised environment (e.g., your home lab).</li>
+                <li>Stop the capture when done (red square button).</li>
+                <li>Navigate to: <strong>File &rarr; Export Packet Dissections &rarr; As CSV...</strong></li>
+                <li>Save the file and upload it into this triage tool.</li>
+              </ol>
+            </div>
+
+            <div class="edu-card">
+              <h3>Analyst Limitations to Keep in Mind</h3>
+              <ul style="padding-left: 1.25rem; font-size: 0.885rem; color: var(--text-muted); line-height: 1.6;">
+                <li><strong>Metadata vs. Full PCAP:</strong> CSV exports contain summary headers, not raw payload hex streams.</li>
+                <li><strong>Encrypted Payloads:</strong> TLS/HTTPS traffic is encrypted; content cannot be inspected without decryption keys.</li>
+                <li><strong>NAT Masking:</strong> Network Address Translation can cause an entire office or home to appear as a single public IP.</li>
+                <li><strong>Static vs. Dynamic Thresholds:</strong> Real enterprise SIEMs calculate rolling statistical baselines rather than static numbers.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- SOC Incident Report Modal -->
+    <div id="report-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-report-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent-cyan);">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            SOC Incident Triage Report
+          </div>
+          <button type="button" class="btn-close-modal" id="btn-close-modal" aria-label="Close Modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="report-preview-box" id="report-preview-text">Generating report...</div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-copy-report">Copy Markdown</button>
+          <button type="button" class="btn btn-primary" id="btn-print-report">Print / Save as PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <p>Network Traffic Triage Tool &bull; Advanced Educational Cybersecurity Platform</p>
+      <p style="margin-top: 0.25rem;">Built with Vanilla HTML, CSS, and JavaScript. 100% private in-browser analysis.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
